@@ -1,4 +1,4 @@
-// src/FileUploader.tsx
+
 import React from "react";
 
 const FileUploader: React.FC = () => {

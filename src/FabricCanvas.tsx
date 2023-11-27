@@ -74,7 +74,7 @@ const FabricCanvas: React.FC = () => {
     fabricCanvas.renderAll();
   };
 
-  return <canvas ref={canvasRef} id="canvas" width={800} height={600} />;
+  return <canvas ref={canvasRef} id="canvas" width={1980} height={1280} />;
 };
 
 export default FabricCanvas;
