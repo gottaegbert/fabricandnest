@@ -7,6 +7,27 @@ interface LineWithId extends fabric.Line {
   id?: string;
 }
 
+const throttle = (func: (...args: any[]) => void, limit: number) => {
+  let lastFunc: NodeJS.Timeout;
+  let lastRan: number;
+
+  return function (...args: any[]) {
+    if (!lastRan) {
+      func(...args);
+      lastRan = Date.now();
+    } else {
+      clearTimeout(lastFunc);
+      lastFunc = setTimeout(() => {
+        if ((Date.now() - lastRan) >= limit) {
+          func(...args);
+          lastRan = Date.now();
+        }
+      }, limit - (Date.now() - lastRan));
+    }
+  };
+};
+
+
 const FabricCanvas: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -24,8 +45,15 @@ const FabricCanvas: React.FC = () => {
       });
 
       fabricCanvas.add(rect);
-      rect.on("modified", () => updateOutline(rect, fabricCanvas));
+      // const updateFunction = () => updateOutline(rect, fabricCanvas);
+       const throttledUpdateOutline = throttle(() => updateOutline(rect, fabricCanvas), 100);
+      rect.on("moving", throttledUpdateOutline);
+      rect.on("rotating", throttledUpdateOutline);
+      rect.on("modified", throttledUpdateOutline);
+
+      // Initial outline update
       updateOutline(rect, fabricCanvas);
+    
     }
   }, []);
 
@@ -60,7 +88,7 @@ const FabricCanvas: React.FC = () => {
         [point.x, point.y, nextPoint.x, nextPoint.y],
         {
           stroke: "red",
-          strokeWidth: 2,
+          strokeWidth: 5,
           selectable: false,
           evented: false,
         }
